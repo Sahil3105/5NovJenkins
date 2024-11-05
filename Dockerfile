@@ -19,7 +19,11 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
+# Copy app files from the build stage
 COPY --from=build /app /app
+
+# Set npm config to a user writable cache
+RUN mkdir -p /home/appuser/.npm && chown -R appuser:appgroup /home/appuser/.npm
 
 # Change to the new user
 USER appuser
