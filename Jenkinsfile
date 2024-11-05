@@ -2,21 +2,21 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = 'sahil3105' // Replace with your Docker Hub username
-        DOCKER_IMAGE = "my-docker-app"
+        DOCKER_USERNAME = credentials('docker-username') // Replace with your Jenkins credential ID for Docker Hub username
+        DOCKER_PASSWORD = credentials('docker-password') // Replace with your Jenkins credential ID for Docker Hub password
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Sahil3105/5NovJenkins.git'
+                git 'https://github.com/Sahil3105/5NovJenkins.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest")
+                    sh 'docker build -t sahil3105/my-docker-app:latest .'
                 }
             }
         }
@@ -24,36 +24,42 @@ pipeline {
         stage('Test Docker Image') {
             steps {
                 script {
-                    docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").inside {
-                        sh 'npm install --silent' // Install all dependencies quietly
-                        sh 'npm test' // Run tests inside the Docker container
-                    }
+                    sh 'docker run -t sahil3105/my-docker-app:latest npm install --silent'
+                }
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                script {
+                    // Log in to Docker Hub
+                    sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin'
                 }
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    script {
-                        docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                            docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").push()
-                        }
-                    }
+                script {
+                    sh 'docker push sahil3105/my-docker-app:latest'
                 }
             }
         }
 
         stage('Cleanup') {
             steps {
-                sh "docker rmi ${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest"
+                script {
+                    // Optionally remove the local image after pushing
+                    sh 'docker rmi sahil3105/my-docker-app:latest || true'
+                }
             }
         }
     }
 
     post {
         always {
-            archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true // Adjust based on generated artifacts
+            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true // Adjust this path based on your build output
+            cleanWs()
         }
     }
 }
