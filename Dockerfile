@@ -3,26 +3,26 @@ FROM node:18 AS build
 
 WORKDIR /app
 
-# Copy package files and install all dependencies, including dev dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the application code
 COPY . .
+
+# Set a different npm cache directory for later stages
+ENV NPM_CONFIG_CACHE=/tmp/.npm
 
 # Stage 2: Run the application
 FROM node:18-alpine
 
+# Add a new user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 WORKDIR /app
 
-# Copy only the necessary files from the build stage
 COPY --from=build /app /app
 
-# Install dev dependencies to ensure mocha is available
-RUN npm install --only=dev
+# Change to the new user
+USER appuser
 
-# Expose the application port
 EXPOSE 3000
-
-# Start the application
 CMD ["npm", "start"]
