@@ -25,6 +25,7 @@ pipeline {
             steps {
                 script {
                     docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").inside {
+                        sh 'npm install --only=dev' // Ensure dev dependencies are installed
                         sh 'npm test' // Run tests inside Docker container
                     }
                 }
