@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = 'your-dockerhub-username'
+        DOCKER_REGISTRY = 'sahil3105' // Replace with your Docker Hub username
         DOCKER_IMAGE = "my-docker-app"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/yourusername/my-docker-app.git'
+                git 'https://github.com/Sahil3105/5NovJenkins.git'
             }
         }
 
@@ -52,8 +52,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+            archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true // Adjust to your artifact type, if any
         }
     }
 }
-
