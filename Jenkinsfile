@@ -25,7 +25,7 @@ pipeline {
             steps {
                 script {
                     docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").inside {
-                        sh 'npm install' // Install all dependencies
+                        sh 'npm install --silent' // Install all dependencies quietly
                         sh 'npm test' // Run tests inside the Docker container
                     }
                 }
