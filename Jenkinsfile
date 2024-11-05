@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/Sahil3105/5NovJenkins.git'
+                git branch: 'main', url: 'https://github.com/Sahil3105/5NovJenkins.git'
             }
         }
 
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 script {
                     docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").inside {
-                        sh 'npm test'
+                        sh 'npm test' // Run tests inside Docker container
                     }
                 }
             }
@@ -33,7 +33,7 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                withCredentials([string(credentialsId: 'dockerhub-credentials', variable: 'DOCKER_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     script {
                         docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
                             docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:latest").push()
@@ -52,7 +52,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true // Adjust to your artifact type, if any
+            archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true // Adjust based on generated artifacts
         }
     }
 }
