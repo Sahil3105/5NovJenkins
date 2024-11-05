@@ -1,0 +1,18 @@
+{
+  "name": "my-docker-app",
+  "version": "1.0.0",
+  "description": "A simple Node.js app with Docker multi-stage build",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "mocha test/*.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "mocha": "^10.0.0",
+    "chai": "^4.3.4"
+  }
+}
+
